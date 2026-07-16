@@ -1,0 +1,14 @@
+# nvidia/nemotron-3.5-asr-streaming-0.6b — lookahead (right context) = 6.
+# att_context_size=[56,6]: lookahead lớn = chính xác hơn, độ trễ cao hơn.
+# Bộ hỗ trợ: [56,0] [56,3] [56,6] [56,13]. Cache-aware streaming + prompt vi-VN.
+name: nemotron_06b_la6
+adapter: benchmark.adapters.nemotron.NemotronStreamingAdapter
+sample_rate: 16000
+params:
+  model_id: nvidia/nemotron-3.5-asr-streaming-0.6b
+  device: cuda
+  target_lang: vi-VN
+  att_context_size: [56, 6]
+  online_normalization: false
+  pad_and_drop_preencoded: false
+  strip_lang_tags: true
