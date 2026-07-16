@@ -87,6 +87,38 @@ def align(ref: list[str], hyp: list[str]) -> EditCounts:
     return counts
 
 
+def align_ops(ref: list[str], hyp: list[str]) -> list[tuple]:
+    """Như align() nhưng trả về danh sách phép căn chỉnh theo thứ tự xuôi.
+
+    Mỗi phần tử: (op, ref_tok|None, hyp_tok|None) với op ∈ {equal, sub, del, ins}.
+    Dùng cho error-analysis (gom cặp thay thế, từ bị nuốt/thêm).
+    """
+    n, m = len(ref), len(hyp)
+    d = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        d[i][0] = i
+    for j in range(1, m + 1):
+        d[0][j] = j
+    for i in range(1, n + 1):
+        ri, di, dim1 = ref[i - 1], d[i], d[i - 1]
+        for j in range(1, m + 1):
+            di[j] = dim1[j - 1] if ri == hyp[j - 1] else 1 + min(dim1[j - 1], dim1[j], di[j - 1])
+
+    ops = []
+    i, j = n, m
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and ref[i - 1] == hyp[j - 1] and d[i][j] == d[i - 1][j - 1]:
+            ops.append(("equal", ref[i - 1], hyp[j - 1])); i, j = i - 1, j - 1
+        elif i > 0 and j > 0 and d[i][j] == d[i - 1][j - 1] + 1:
+            ops.append(("sub", ref[i - 1], hyp[j - 1])); i, j = i - 1, j - 1
+        elif i > 0 and d[i][j] == d[i - 1][j] + 1:
+            ops.append(("del", ref[i - 1], None)); i -= 1
+        else:
+            ops.append(("ins", None, hyp[j - 1])); j -= 1
+    ops.reverse()
+    return ops
+
+
 def _tokenize_words(text: str) -> list[str]:
     return text.split()
 

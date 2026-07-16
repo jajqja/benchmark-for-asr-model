@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from benchmark.metrics.wer import align, compute_wer, compute_cer, compute_ser
+from benchmark.metrics.wer import align, align_ops, compute_wer, compute_cer, compute_ser
 from benchmark.normalize.vi_normalizer import ViNormalizer, num_to_vietnamese, remove_diacritics
 
 
@@ -24,6 +24,22 @@ def test_align_sub_and_ins():
     c = align("a b c".split(), "a x c d".split())  # b->x (sub), +d (ins)
     assert (c.sub, c.ins, c.dele) == (1, 1, 0), (c.sub, c.ins, c.dele)
     approx(c.rates()["wer"], 2 / 3)
+
+
+def test_align_ops():
+    ops = align_ops("a b c".split(), "a x c d".split())
+    assert ops == [("equal", "a", "a"), ("sub", "b", "x"),
+                   ("equal", "c", "c"), ("ins", None, "d")]
+    # số phép phải khớp align()
+    c = align("a b c".split(), "a x c d".split())
+    got = (sum(o[0] == "sub" for o in ops), sum(o[0] == "ins" for o in ops),
+           sum(o[0] == "del" for o in ops))
+    assert got == (c.sub, c.ins, c.dele) == (1, 1, 0)
+
+
+def test_align_ops_deletion():
+    ops = align_ops("the cat sat".split(), "the sat".split())
+    assert ("del", "cat", None) in ops
 
 
 def test_wer_corpus():
