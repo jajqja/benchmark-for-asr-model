@@ -1,0 +1,18 @@
+# Cấu hình chuẩn hoá text — DÙNG CHUNG cho cả reference lẫn mọi hypothesis.
+# Đây là chỗ benchmark dễ lệch nhất: mọi model phải được chấm với cùng một cấu hình.
+#
+# Thứ tự áp dụng trong ViNormalizer:
+#   NFC -> lowercase -> normalize_numbers -> strip_punct -> remove_diacritics -> collapse_whitespace
+
+unicode_form: NFC          # NFC | NFD | NFKC | NFKD | null
+lowercase: true
+strip_punct: true          # thay dấu câu bằng khoảng trắng
+collapse_whitespace: true  # gộp nhiều khoảng trắng -> 1, trim 2 đầu
+
+# Chuẩn hoá số về dạng đọc (spoken form). EXPERIMENTAL — xem điểm quyết định còn mở
+# trong DESIGN.md. Mặc định TẮT để tránh làm lệch WER ngoài ý muốn.
+normalize_numbers: false
+
+# remove_diacritics KHÔNG bật ở cấu hình chính. run_scoring tự tạo thêm một biến thể
+# bỏ dấu để tính "WER không dấu" song song — không cần chỉnh ở đây.
+remove_diacritics: false

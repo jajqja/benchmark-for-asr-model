@@ -1,0 +1,19 @@
+# Mô tả tập dữ liệu benchmark.
+name: my_data_test
+manifest: data/manifests/my_data_test.jsonl
+
+# Dùng khi build manifest từ audio + transcript rời (scripts/prepare_manifest.py).
+prepare:
+  audio_dir: data/raw
+  transcript_dir: data/transcripts
+  # Cách ghép audio <-> transcript:
+  #   per_file : mỗi audio có 1 file transcript cùng tên (0001.wav -> 0001.txt)
+  #   table    : một file bảng (tsv/csv) chứa cột id + text
+  mode: per_file
+  transcript_ext: .txt
+  audio_ext: .wav
+  # Chỉ dùng khi mode=table:
+  table_path: null
+  id_column: id
+  text_column: text
+  default_domain: clean
