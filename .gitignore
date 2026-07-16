@@ -224,3 +224,8 @@ __marimo__/
 /data/raw/
 /data/transcripts/
 /results/hypotheses/
+
+# Dữ liệu upload RIÊNG TƯ (audio khách hàng + transcript) — TUYỆT ĐỐI không commit
+/Auto_AutoELE/
+/Data Audio_*.csv
+/data/manifests/*.jsonl
