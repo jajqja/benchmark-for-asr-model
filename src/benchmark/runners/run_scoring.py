@@ -91,11 +91,21 @@ def score(manifest_path, hyp_path, norm_cfg, empty_hyp="empty"):
     tot_infer = sum(x["infer_time"] for x in matched if x["infer_time"] is not None)
     tot_audio = sum(x["audio_dur"] for x in matched if x["audio_dur"] is not None)
     have_timing = any(x["infer_time"] is not None for x in matched)
+    # Peak VRAM lấy từ sidecar do run_inference ghi (nếu có).
+    peak_vram = None
+    meta_path = hyp_path + ".meta.json"
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path, "r", encoding="utf-8") as f:
+                peak_vram = json.load(f).get("peak_vram_mb")
+        except Exception:
+            pass
     efficiency = {
         "rtf": (tot_infer / tot_audio) if (have_timing and tot_audio > 0) else None,
         "throughput_x_realtime": (tot_audio / tot_infer) if (have_timing and tot_infer > 0) else None,
         "total_audio_sec": tot_audio,
         "total_infer_sec": tot_infer if have_timing else None,
+        "peak_vram_mb": peak_vram,
     }
 
     # Cắt lát theo domain.
