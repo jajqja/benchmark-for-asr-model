@@ -1,9 +1,12 @@
-# nvidia/nemotron-3.5-asr-streaming-0.6b — NeMo. Chấm offline.
+# nvidia/nemotron-3.5-asr-streaming-0.6b — NeMo, cache-aware streaming.
+# transcribe() KHÔNG dùng được (prompt None) -> adapter đi đường conformer_stream_step.
 name: nemotron_06b
-adapter: benchmark.adapters.nemotron.NemotronNeMoAdapter
+adapter: benchmark.adapters.nemotron.NemotronStreamingAdapter
 sample_rate: 16000
 params:
   model_id: nvidia/nemotron-3.5-asr-streaming-0.6b
   device: cuda
-  batch_size: 1
-  target_lang: vi-VN   # BẮT BUỘC — model đa ngôn ngữ; 'auto' = tự nhận diện
+  target_lang: vi-VN          # BẮT BUỘC (key trong prompt_dictionary); 'auto' = tự nhận diện
+  # att_context_size: [70, 13] # lookahead; bỏ trống = mặc định model. VD [56,3] cho độ trễ thấp
+  online_normalization: false
+  pad_and_drop_preencoded: false
