@@ -35,8 +35,8 @@ PYTHONPATH=src python -m benchmark.runners.run_inference \
   --manifest data/manifests/auto_autoele.jsonl \
   --out results/hypotheses/gipformer_65m_fp32/auto_autoele.jsonl
 
-# 2. Chấm điểm + leaderboard cho mọi hypotheses đã có
-bash scripts/run_all.sh
+# 2. Chấm điểm + leaderboard + biểu đồ đánh đổi cho mọi hypotheses đã có
+bash scripts/run_all.sh   # -> results/reports/{leaderboard.md,leaderboard.csv,tradeoff.png}
 ```
 
 Trên Colab A100: dùng `notebooks/00_setup_colab.ipynb` → `01_run_model.ipynb` (mỗi model) → `02_report.ipynb`.

@@ -33,3 +33,8 @@ python -m benchmark.report.build_report \
   --metrics-dir results/metrics \
   --out-md results/reports/leaderboard.md \
   --out-csv results/reports/leaderboard.csv
+
+echo "=== biểu đồ đánh đổi accuracy/speed ==="
+python -m benchmark.report.plot_tradeoff \
+  --csv results/reports/leaderboard.csv \
+  --out results/reports/tradeoff.png || echo "(bỏ qua plot — thiếu RTF hoặc matplotlib)"

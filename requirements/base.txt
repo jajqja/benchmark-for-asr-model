@@ -5,6 +5,7 @@ tqdm>=4.65
 numpy>=1.24
 soundfile>=0.12      # đọc duration audio (fallback sang module `wave` cho .wav)
 librosa>=0.10        # resample chất lượng cao (dữ liệu 8kHz -> 16kHz); thiếu -> fallback tuyến tính
+matplotlib>=3.7      # vẽ scatter đánh đổi accuracy/speed (plot_tradeoff)
 
 # Tùy chọn — chỉ dùng để đối chiếu/kiểm chứng metric, không bắt buộc:
 # jiwer>=3.0
