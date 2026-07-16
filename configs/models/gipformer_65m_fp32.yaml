@@ -1,7 +1,6 @@
-# g-group-ai-lab/gipformer-65M-rnnt — RNNT transducer qua sherpa-onnx (OFFLINE).
-# Repo có CẢ bản fp32 lẫn int8 -> phải khai báo tên file rõ (không để null, sẽ dò ra 2 ứng viên).
-# Dùng fp32 cho chính xác; đổi sang *.int8.onnx nếu cần nhẹ/nhanh hơn.
-name: gipformer_65m
+# g-group-ai-lab/gipformer-65M-rnnt — fp32 (sherpa-onnx OFFLINE).
+# int8 = nhanh/nhẹ hơn, fp32 = chính xác hơn.
+name: gipformer_65m_fp32
 adapter: benchmark.adapters.sherpa_onnx_transducer.SherpaOnnxTransducerAdapter
 sample_rate: 16000
 params:

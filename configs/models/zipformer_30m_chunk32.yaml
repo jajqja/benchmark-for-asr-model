@@ -1,0 +1,16 @@
+# hynt/Zipformer-30M-RNNT-Streaming — chunk 32/left-128 (sherpa-onnx ONLINE).
+# Chunk nhỏ = độ trễ thấp, ngữ cảnh ít; chunk lớn = chính xác hơn, chậm hơn.
+# Cần tokens.txt (sinh từ bpe.model — xem 01_run_model.ipynb).
+name: zipformer_30m_chunk32
+adapter: benchmark.adapters.sherpa_onnx_transducer.SherpaOnnxTransducerAdapter
+sample_rate: 16000
+params:
+  mode: online
+  repo_id: hynt/Zipformer-30M-RNNT-Streaming-6000h
+  encoder: encoder-epoch-31-avg-11-chunk-32-left-128.fp16.onnx
+  decoder: decoder-epoch-31-avg-11-chunk-32-left-128.fp16.onnx
+  joiner: joiner-epoch-31-avg-11-chunk-32-left-128.fp16.onnx
+  tokens: models/zipformer_tokens.txt
+  provider: cuda
+  num_threads: 4
+  decoding_method: greedy_search

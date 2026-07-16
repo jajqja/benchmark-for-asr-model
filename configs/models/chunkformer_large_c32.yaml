@@ -1,0 +1,12 @@
+# khanhld/chunkformer-ctc-large-vie — chunk_size=32 khi decode (CTC offline).
+# chunk_size lớn = nhiều ngữ cảnh attention = chính xác hơn, chậm/tốn VRAM hơn.
+name: chunkformer_large_c32
+adapter: benchmark.adapters.chunkformer.ChunkFormerAdapter
+sample_rate: 16000
+params:
+  model_id: khanhld/chunkformer-ctc-large-vie
+  device: cuda
+  chunk_size: 32
+  left_context_size: 128
+  right_context_size: 128
+  total_batch_duration: 14400

@@ -1,0 +1,15 @@
+# g-group-ai-lab/gipformer-65M-rnnt — int8 (sherpa-onnx OFFLINE).
+# int8 = nhanh/nhẹ hơn, fp32 = chính xác hơn.
+name: gipformer_65m_int8
+adapter: benchmark.adapters.sherpa_onnx_transducer.SherpaOnnxTransducerAdapter
+sample_rate: 16000
+params:
+  mode: offline
+  repo_id: g-group-ai-lab/gipformer-65M-rnnt
+  encoder: encoder-epoch-35-avg-6.int8.onnx
+  decoder: decoder-epoch-35-avg-6.int8.onnx
+  joiner: joiner-epoch-35-avg-6.int8.onnx
+  tokens: tokens.txt
+  provider: cuda
+  num_threads: 4
+  decoding_method: greedy_search
