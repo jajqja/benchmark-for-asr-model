@@ -230,3 +230,6 @@ __marimo__/
 /SOL_UPS/
 /Data Audio_*.csv
 /data/manifests/*.jsonl
+
+# log tạm
+/log.txt
