@@ -1,8 +1,53 @@
-# Models
+# ASR Benchmark (tiếng Việt)
+
+Benchmark offline (WER/CER/RTF) cho các model ASR tiếng Việt trên dữ liệu riêng.
+Thiết kế chi tiết: xem `.claude/DESIGN.md`.
+
+## Models
 
 - hynt/Zipformer-30M-RNNT-Streaming-6000h: https://huggingface.co/hynt/Zipformer-30M-RNNT-Streaming-6000h
 - nvidia/nemotron-3.5-asr-streaming-0.6b: https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b
 - khanhld/chunkformer-ctc-large-vie: https://huggingface.co/khanhld/chunkformer-ctc-large-vie
 - g-group-ai-lab/gipformer-65M-rnnt: https://huggingface.co/g-group-ai-lab/gipformer-65M-rnnt
 
+## Kiến trúc
 
+Tách 2 giai đoạn để tránh xung đột dependency giữa các framework:
+
+1. **Inference** (framework-specific, cần GPU) → `results/hypotheses/<model>/<dataset>.jsonl`
+2. **Scoring** (framework-agnostic, không GPU) → `results/metrics/...` → `leaderboard`
+
+```
+data/manifests/*.jsonl ──┐
+                         ├─► run_inference ─► hypotheses ─► run_scoring ─► build_report ─► leaderboard
+configs/models/*.yaml ───┘        (GPU)                        (CPU)          (CPU)
+```
+
+## Quy trình
+
+```bash
+# 0. Dựng manifest từ audio + transcript (xem configs/datasets/*.yaml)
+python scripts/prepare_manifest.py --config configs/datasets/auto_autoele.yaml
+
+# 1. Inference 1 model (resume-được). Mỗi model 1 env riêng — xem requirements/<model>.txt
+PYTHONPATH=src python -m benchmark.runners.run_inference \
+  --model-config configs/models/gipformer_65m.yaml \
+  --manifest data/manifests/auto_autoele.jsonl \
+  --out results/hypotheses/gipformer_65m/auto_autoele.jsonl
+
+# 2. Chấm điểm + leaderboard cho mọi hypotheses đã có
+bash scripts/run_all.sh
+```
+
+Trên Colab A100: dùng `notebooks/00_setup_colab.ipynb` → `01_run_model.ipynb` (mỗi model) → `02_report.ipynb`.
+
+## Độ đo
+
+WER, CER, WER/CER không dấu, SER, tỉ lệ I/D/S, RTF, throughput, peak VRAM — cắt lát theo `domain`.
+
+## Ghi chú
+
+- Chuẩn hoá text (`configs/normalization/vi.yaml`) áp CHUNG cho ref + mọi hyp để so sánh công bằng.
+- Acronym/brand (INVT, Siemens...) model đọc phiên âm còn reference viết dạng chữ → tính là lỗi;
+  coi là giới hạn chung (ảnh hưởng đều mọi model, ~0.5% token, không đổi thứ hạng).
+- Dữ liệu và manifest là RIÊNG TƯ, không commit (xem `.gitignore`).
