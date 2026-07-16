@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import csv
 import os
+import re
 import sys
 import wave
 
@@ -73,22 +74,75 @@ def build_per_file(p: dict, default_domain: str):
     return rows, missing_txt
 
 
+# Nhãn người nói đầu dòng: "Nhân viên CSKH:", "Khách hàng:", tên riêng, "Speaker 3:"...
+# Chỉ coi là nhãn khi phần trước dấu ':' ngắn (<=5 từ) và không chứa dấu câu kết câu.
+_LABEL_RE = re.compile(r"^\s*([^:.!?]{1,30}):\s*")
+
+
+def clean_script(text: str, strip_labels: bool) -> str:
+    """Gộp hội thoại nhiều dòng -> 1 dòng text nói, bỏ nhãn người nói ở đầu mỗi dòng."""
+    out = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if strip_labels:
+            m = _LABEL_RE.match(line)
+            if m and len(m.group(1).split()) <= 5:
+                line = line[m.end():]
+        if line:
+            out.append(line)
+    return " ".join(" ".join(out).split())
+
+
+def _audio_index(audio_dir: str, ext: str) -> dict[str, str]:
+    """Map cả tên file đầy đủ (0001.wav) lẫn stem (0001) -> path, để khớp linh hoạt."""
+    idx: dict[str, str] = {}
+    for name in sorted(os.listdir(audio_dir)):
+        if name.lower().endswith(ext.lower()):
+            path = os.path.join(audio_dir, name)
+            idx[name] = path
+            idx[os.path.splitext(name)[0]] = path
+    return idx
+
+
 def build_table(p: dict, default_domain: str):
     table_path = p["table_path"]
     id_col = p.get("id_column", "id")
     text_col = p.get("text_column", "text")
-    audio = _list_audio(p["audio_dir"], p.get("audio_ext", ".wav"))
+    domain_col = p.get("domain_column")
+    filters = p.get("filters") or {}        # {Cột: giá trị chấp nhận} (str hoặc list)
+    strip_labels = p.get("strip_speaker_labels", False)
+    audio = _audio_index(p["audio_dir"], p.get("audio_ext", ".wav"))
+
+    def _passes(row) -> bool:
+        for col, want in filters.items():
+            val = (row.get(col) or "").strip()
+            ok = val in want if isinstance(want, (list, tuple, set)) else val == want
+            if not ok:
+                return False
+        return True
+
     delim = "\t" if table_path.lower().endswith(".tsv") else ","
     rows, missing_audio = [], []
-    with open(table_path, "r", encoding="utf-8") as f:
+    n_total = n_filtered = 0
+    with open(table_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f, delimiter=delim)
         for r in reader:
-            uid = r[id_col].strip()
-            apath = audio.get(uid)
-            if apath is None:
-                missing_audio.append(uid)
+            n_total += 1
+            if not _passes(r):
                 continue
-            rows.append(_make_row(uid, apath, " ".join(r[text_col].split()), default_domain))
+            n_filtered += 1
+            name = (r[id_col] or "").strip()
+            apath = audio.get(name) or audio.get(os.path.splitext(name)[0])
+            if apath is None:
+                missing_audio.append(name)
+                continue
+            uid = os.path.splitext(os.path.basename(name))[0]
+            text = clean_script(r[text_col] or "", strip_labels)
+            domain = ((r.get(domain_col) or "").strip() or default_domain) if domain_col else default_domain
+            rows.append(_make_row(uid, apath, text, domain))
+    print(f"  lọc: {n_filtered}/{n_total} dòng khớp filter", file=sys.stderr)
     return rows, missing_audio
 
 

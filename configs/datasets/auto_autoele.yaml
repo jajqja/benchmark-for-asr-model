@@ -1,0 +1,19 @@
+# Bộ dữ liệu Auto_AutoELE (call-center, RIÊNG TƯ — không commit manifest).
+# Chỉ lấy dòng State=Xong VÀ Note=Checked; bỏ nhãn người nói khỏi Script;
+# domain lấy theo cột Categories.
+name: auto_autoele
+manifest: data/manifests/auto_autoele.jsonl
+
+prepare:
+  mode: table
+  table_path: Data Audio_Auto_AutoELE_Grid.csv
+  audio_dir: Auto_AutoELE
+  audio_ext: .wav
+  id_column: Name
+  text_column: Script
+  domain_column: Categories
+  strip_speaker_labels: true
+  filters:
+    State: Xong
+    Note: Checked
+  default_domain: unknown
