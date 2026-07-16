@@ -1,0 +1,19 @@
+# Bộ dữ liệu SOL_UPS (call-center, RIÊNG TƯ — không commit manifest).
+# Cùng quy tắc lọc như Auto_AutoELE: State=Xong VÀ Note=Checked; bỏ nhãn người nói;
+# domain lấy theo cột Categories.
+name: sol_ups
+manifest: data/manifests/sol_ups.jsonl
+
+prepare:
+  mode: table
+  table_path: Data Audio_SOL_UPS_Grid.csv
+  audio_dir: SOL_UPS
+  audio_ext: .wav
+  id_column: Name
+  text_column: Script
+  domain_column: Categories
+  strip_speaker_labels: true
+  filters:
+    State: Xong
+    Note: Checked
+  default_domain: unknown

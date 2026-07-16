@@ -227,5 +227,6 @@ __marimo__/
 
 # Dữ liệu upload RIÊNG TƯ (audio khách hàng + transcript) — TUYỆT ĐỐI không commit
 /Auto_AutoELE/
+/SOL_UPS/
 /Data Audio_*.csv
 /data/manifests/*.jsonl
