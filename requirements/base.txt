@@ -1,0 +1,9 @@
+# Lõi framework-agnostic: chuẩn hoá + scoring + chuẩn bị manifest.
+# Cố ý giữ tối thiểu — WER/CER tự implement, không cần jiwer để chạy.
+PyYAML>=6.0
+tqdm>=4.65
+soundfile>=0.12      # đọc duration audio (fallback sang module `wave` cho .wav)
+
+# Tùy chọn — chỉ dùng để đối chiếu/kiểm chứng metric, không bắt buộc:
+# jiwer>=3.0
+# pandas>=2.0
