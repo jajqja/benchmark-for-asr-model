@@ -57,9 +57,9 @@ Mỗi nhóm model có nhiều variant (mỗi variant = 1 file config = 1 dòng l
 - **zipformer**: `chunk16` / `chunk32` / `chunk64` — chunk nhỏ = độ trễ thấp, kém chính xác hơn.
 - **gipformer**: `int8` / `fp32` — int8 nhanh & nhẹ, fp32 chính xác hơn.
 - **chunkformer**: `c16` / `c32` / `c64` — `chunk_size` khi decode; lớn = nhiều ngữ cảnh, chính xác hơn nhưng chậm/tốn VRAM.
-- **nemotron**: `la0` / `la3` / `la6` / `la13` — lookahead `att_context_size=[56, r]`; lookahead lớn = chính xác hơn, độ trễ cao hơn.
+- **nemotron**: `la0` / `la13` — lookahead `att_context_size=[56, r]` (2 cực trị; nemotron chậm nên chỉ đo 2 điểm). Bộ hỗ trợ đầy đủ: 0/3/6/13.
 
-→ 13 variant tổng cộng, đủ vẽ đường cong accuracy ↔ speed cả trong-nhóm lẫn giữa các nhóm.
+→ 10 variant, đủ vẽ đường cong accuracy ↔ speed cả trong-nhóm lẫn giữa các nhóm.
 
 Notebook `01_run_model.ipynb` chọn `FAMILY` rồi tự chạy TẤT CẢ variant của nhóm trong cùng một env.
 
