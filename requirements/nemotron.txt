@@ -1,0 +1,9 @@
+# Env cho Nemotron (nvidia/nemotron-3.5-asr-streaming-0.6b) — NeMo.
+# Gói hệ thống (chạy trước trong Colab):
+#   apt-get update && apt-get install -y libsndfile1 ffmpeg
+#   pip install Cython packaging
+# Cài kèm requirements/base.txt.
+-r base.txt
+nemo_toolkit[asr] @ git+https://github.com/NVIDIA/NeMo.git@main
+# Cách khác (Transformers >=5.13, đơn giản hơn nhưng adapter hiện viết cho NeMo):
+# transformers>=5.13

@@ -1,0 +1,8 @@
+# nvidia/nemotron-3.5-asr-streaming-0.6b — NeMo. Chấm offline.
+name: nemotron_06b
+adapter: benchmark.adapters.nemotron.NemotronNeMoAdapter
+sample_rate: 16000
+params:
+  model_id: nvidia/nemotron-3.5-asr-streaming-0.6b
+  device: cuda
+  batch_size: 1
