@@ -45,7 +45,18 @@ Trên Colab A100: dùng `notebooks/00_setup_colab.ipynb` → `01_run_model.ipynb
 
 WER, CER, WER/CER không dấu, SER, tỉ lệ I/D/S, RTF, throughput, peak VRAM — cắt lát theo `domain`.
 
-## Ghi chú
+## Lưu ý theo model
+
+- **nemotron**: model đa ngôn ngữ `EncDecRNNTBPEModelWithPrompt` — `model.transcribe()` KHÔNG
+  dùng được (báo `Unknown prompt key: 'None'` vì prompt ngôn ngữ đọc từ dataloader). Adapter đi
+  đường cache-aware streaming: `set_inference_prompt(target_lang)` + `conformer_stream_step`.
+  Phải đặt `target_lang` (mặc định `vi-VN`; `auto` = tự nhận diện) trong config. Output có thẻ
+  ngôn ngữ ở cuối (vd `<vi-VN>`) → adapter tự cắt (`strip_lang_tags: true`).
+- **zipformer**: repo chỉ có `bpe.model`, không có `tokens.txt` → sinh trước rồi trỏ `tokens:`
+  vào file đó (xem `configs/models/zipformer_30m.yaml` và cell trong `01_run_model.ipynb`).
+- **gipformer**: repo có cả bản int8 lẫn fp32 → config đã ghi rõ tên file fp32.
+
+## Ghi chú chung
 
 - Chuẩn hoá text (`configs/normalization/vi.yaml`) áp CHUNG cho ref + mọi hyp để so sánh công bằng.
 - Acronym/brand (INVT, Siemens...) model đọc phiên âm còn reference viết dạng chữ → tính là lỗi;
