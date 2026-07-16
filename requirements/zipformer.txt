@@ -1,0 +1,7 @@
+# Env cho Zipformer streaming (hynt/Zipformer-30M-RNNT-Streaming-6000h) — sherpa-onnx ONLINE.
+# Cài kèm requirements/base.txt.
+-r base.txt
+sherpa-onnx        # bản GPU: cài wheel CUDA tương ứng để dùng provider=cuda
+huggingface_hub
+onnxruntime-gpu    # cho provider=cuda; nếu chỉ CPU dùng onnxruntime
+sentencepiece      # sinh tokens.txt từ bpe.model (xem configs/models/zipformer_30m.yaml)

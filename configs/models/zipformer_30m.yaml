@@ -1,0 +1,24 @@
+# hynt/Zipformer-30M-RNNT-Streaming-6000h — RNNT streaming qua sherpa-onnx (ONLINE).
+#
+# LƯU Ý QUAN TRỌNG: repo chỉ có bpe.model, KHÔNG có tokens.txt (sherpa-onnx cần tokens.txt).
+# Sinh tokens.txt từ bpe.model trước khi chạy (chạy 1 lần):
+#   python -c "import sentencepiece as spm; sp=spm.SentencePieceProcessor(); \
+#     sp.load('bpe.model'); \
+#     open('tokens.txt','w').write(''.join(f'{sp.id_to_piece(i)} {i}\n' \
+#     for i in range(sp.get_piece_size())))"
+# rồi trỏ `tokens` xuống file đó. (Cách khác: dùng torch/k2 `sherpa` với jit_script_*.pt.)
+#
+# Repo có 3 biến thể chunk (16/32/64). Mặc định chunk 64 (WER tốt nhất, độ trễ cao nhất).
+name: zipformer_30m
+adapter: benchmark.adapters.sherpa_onnx_transducer.SherpaOnnxTransducerAdapter
+sample_rate: 16000
+params:
+  mode: online
+  repo_id: hynt/Zipformer-30M-RNNT-Streaming-6000h
+  encoder: encoder-epoch-31-avg-11-chunk-64-left-128.fp16.onnx
+  decoder: decoder-epoch-31-avg-11-chunk-64-left-128.fp16.onnx
+  joiner: joiner-epoch-31-avg-11-chunk-64-left-128.fp16.onnx
+  tokens: tokens.txt        # <-- phải tự sinh (xem lưu ý trên), rồi trỏ path local
+  provider: cuda
+  num_threads: 4
+  decoding_method: greedy_search
