@@ -1,0 +1,6 @@
+# Env cho ChunkFormer (khanhld/chunkformer-ctc-large-vie).
+# Cài kèm requirements/base.txt.
+-r base.txt
+chunkformer
+# torch/torchaudio đã có sẵn trên Colab A100; nếu thiếu:
+# torch torchaudio
