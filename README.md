@@ -29,6 +29,10 @@ configs/models/*.yaml ───┘        (GPU)                        (CPU)    
 # 0. Dựng manifest từ audio + transcript (xem configs/datasets/*.yaml)
 python scripts/prepare_manifest.py --config configs/datasets/auto_autoele.yaml
 
+# 0b. (Khuyến nghị) Lấy subset ~200 utt giữ tỉ lệ domain — cả 13 variant ~10h thay vì ~27h
+python scripts/subset_manifest.py --in data/manifests/auto_autoele.jsonl \
+  --out data/manifests/auto_autoele_sub200.jsonl --n 200 --seed 42
+
 # 1. Inference 1 variant (resume-được). Mỗi nhóm model 1 env riêng — xem requirements/<nhóm>.txt
 PYTHONPATH=src python -m benchmark.runners.run_inference \
   --model-config configs/models/gipformer_65m_fp32.yaml \
