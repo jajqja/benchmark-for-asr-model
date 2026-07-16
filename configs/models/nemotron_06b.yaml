@@ -6,3 +6,4 @@ params:
   model_id: nvidia/nemotron-3.5-asr-streaming-0.6b
   device: cuda
   batch_size: 1
+  target_lang: vi-VN   # BẮT BUỘC — model đa ngôn ngữ; 'auto' = tự nhận diện

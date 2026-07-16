@@ -36,11 +36,15 @@ class NemotronNeMoAdapter(ASRModel):
         except Exception:
             pass
         self.batch_size = self.params.get("batch_size", 1)
+        # Model đa ngôn ngữ: BẮT BUỘC chỉ định ngôn ngữ qua target_lang (vd 'vi-VN'),
+        # nếu không NeMo báo "Unknown prompt key: 'None'".
+        self.target_lang = self.params.get("target_lang", "vi-VN")
 
     def transcribe(self, audio: np.ndarray, sample_rate: int) -> str:
         path = write_temp_wav(audio, sample_rate)
         try:
-            out = self.model.transcribe([path], batch_size=self.batch_size, verbose=False)
+            out = self.model.transcribe(
+                [path], batch_size=self.batch_size, target_lang=self.target_lang)
         finally:
             os.remove(path)
         return _to_text(out)
