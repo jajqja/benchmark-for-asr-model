@@ -219,3 +219,8 @@ __marimo__/
 
 # Claude Code
 .claude/
+
+# ASR benchmark — dữ liệu & kết quả nặng (không commit)
+/data/raw/
+/data/transcripts/
+/results/hypotheses/
