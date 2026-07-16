@@ -16,11 +16,16 @@ CHƯA chạy thử (cần GPU + NeMo) — smoke-test `run_inference --limit 3` t
 from __future__ import annotations
 
 import os
+import re
 
 import numpy as np
 
 from benchmark.adapters.base import ASRModel
 from benchmark.data.audio import write_temp_wav
+
+# Model gắn thẻ ngôn ngữ (vd '<vi-VN>') vào output. Phải cắt Ở ĐÂY, trước chuẩn hoá —
+# nếu để normalizer strip_punct xử lý thì '<vi-VN>' thành token rác 'vi vn'.
+_LANG_TAG_RE = re.compile(r"<[^>]*>")
 
 
 def _calc_drop_extra_pre_encoded(model, step_num, pad_and_drop_preencoded):
@@ -30,9 +35,12 @@ def _calc_drop_extra_pre_encoded(model, step_num, pad_and_drop_preencoded):
     return model.encoder.streaming_cfg.drop_extra_pre_encoded
 
 
-def _text_of(item) -> str:
+def _text_of(item, strip_lang_tags=True) -> str:
     t = getattr(item, "text", None)
-    return (t if isinstance(t, str) else str(item)).strip()
+    s = t if isinstance(t, str) else str(item)
+    if strip_lang_tags:
+        s = _LANG_TAG_RE.sub(" ", s)
+    return " ".join(s.split())
 
 
 class NemotronStreamingAdapter(ASRModel):
@@ -62,6 +70,7 @@ class NemotronStreamingAdapter(ASRModel):
 
         self.online_normalization = self.params.get("online_normalization", False)
         self.pad_and_drop_preencoded = self.params.get("pad_and_drop_preencoded", False)
+        self.strip_lang_tags = self.params.get("strip_lang_tags", True)
         self._compute_dtype = next(self.model.parameters()).dtype
 
     def transcribe(self, audio: np.ndarray, sample_rate: int) -> str:
@@ -102,7 +111,7 @@ class NemotronStreamingAdapter(ASRModel):
                     )
         finally:
             os.remove(path)
-        return _text_of(transcribed[0]) if transcribed else ""
+        return _text_of(transcribed[0], self.strip_lang_tags) if transcribed else ""
 
     def teardown(self) -> None:
         self.model = None

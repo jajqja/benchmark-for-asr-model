@@ -10,3 +10,4 @@ params:
   # att_context_size: [70, 13] # lookahead; bỏ trống = mặc định model. VD [56,3] cho độ trễ thấp
   online_normalization: false
   pad_and_drop_preencoded: false
+  strip_lang_tags: true       # cắt thẻ '<vi-VN>' model gắn ở cuối output
