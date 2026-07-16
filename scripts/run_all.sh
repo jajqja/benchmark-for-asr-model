@@ -22,6 +22,10 @@ for hyp in results/hypotheses/*/*.jsonl; do
   python -m benchmark.runners.run_scoring \
     --manifest "$manifest" --hyp "$hyp" --norm-config "$NORM" \
     --model "$model" --out "results/metrics/${model}/${ds}.json"
+  python -m benchmark.report.error_analysis \
+    --manifest "$manifest" --hyp "$hyp" --norm-config "$NORM" \
+    --model "$model" --top 25 \
+    --out-md "results/reports/errors_${model}_${ds}.md"
 done
 
 echo "=== leaderboard ==="
