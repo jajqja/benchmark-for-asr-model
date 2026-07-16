@@ -1,16 +1,16 @@
 # g-group-ai-lab/gipformer-65M-rnnt — RNNT transducer qua sherpa-onnx (OFFLINE).
-# encoder/decoder/joiner/tokens để null -> adapter tự dò trong repo theo tiền tố.
-# Nếu dò nhầm (repo có bản int8 + fp32), khai báo tên file rõ ràng.
+# Repo có CẢ bản fp32 lẫn int8 -> phải khai báo tên file rõ (không để null, sẽ dò ra 2 ứng viên).
+# Dùng fp32 cho chính xác; đổi sang *.int8.onnx nếu cần nhẹ/nhanh hơn.
 name: gipformer_65m
 adapter: benchmark.adapters.sherpa_onnx_transducer.SherpaOnnxTransducerAdapter
 sample_rate: 16000
 params:
   mode: offline
   repo_id: g-group-ai-lab/gipformer-65M-rnnt
-  encoder: null
-  decoder: null
-  joiner: null
-  tokens: null
+  encoder: encoder-epoch-35-avg-6.onnx
+  decoder: decoder-epoch-35-avg-6.onnx
+  joiner: joiner-epoch-35-avg-6.onnx
+  tokens: tokens.txt
   provider: cuda
   num_threads: 4
   decoding_method: greedy_search
