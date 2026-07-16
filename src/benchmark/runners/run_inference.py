@@ -146,6 +146,8 @@ def main(argv=None):
             except Exception as e:
                 n_err += 1
                 print(f"  [{i}/{len(todo)}] LỖI {uid}: {e}", file=sys.stderr)
+            # bảo trì định kỳ (vd giải phóng RAM) — NGOÀI vùng đo giờ ở trên
+            model.after_utterance(i)
             if i % 50 == 0:
                 print(f"  {i}/{len(todo)} (ok={n_ok} err={n_err})", file=sys.stderr)
 

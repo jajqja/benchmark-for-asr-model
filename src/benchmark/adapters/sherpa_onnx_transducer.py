@@ -13,6 +13,7 @@ theo tiền tố (encoder*/decoder*/joiner*/tokens.txt).
 """
 from __future__ import annotations
 
+import gc
 import os
 
 import numpy as np
@@ -27,15 +28,21 @@ class SherpaOnnxTransducerAdapter(ASRModel):
     sample_rate = 16000
 
     def load(self) -> None:
+        self.mode = self.params.get("mode", "offline")
+        # onnxruntime CPU memory arena tích lũy dần theo kích thước input -> RAM tăng
+        # đơn điệu. Tái tạo recognizer sau mỗi `reset_every` utt để giải phóng (0 = tắt).
+        self.reset_every = int(self.params.get("reset_every", 25))
+        self._paths = self._resolve_paths()   # resolve/tải 1 lần, tái dùng khi reset
+        self._build_recognizer()
+
+    def _build_recognizer(self) -> None:
         import sherpa_onnx
 
-        paths = self._resolve_paths()
-        self.mode = self.params.get("mode", "offline")
         common = dict(
-            tokens=paths["tokens"],
-            encoder=paths["encoder"],
-            decoder=paths["decoder"],
-            joiner=paths["joiner"],
+            tokens=self._paths["tokens"],
+            encoder=self._paths["encoder"],
+            decoder=self._paths["decoder"],
+            joiner=self._paths["joiner"],
             num_threads=self.params.get("num_threads", 4),
             sample_rate=self.sample_rate,
             feature_dim=self.params.get("feature_dim", 80),
@@ -48,6 +55,14 @@ class SherpaOnnxTransducerAdapter(ASRModel):
             self.recognizer = sherpa_onnx.OfflineRecognizer.from_transducer(**common)
         else:
             raise ValueError(f"mode không hợp lệ: {self.mode!r} (offline|online)")
+
+    def after_utterance(self, index: int) -> None:
+        # Giải phóng arena tích lũy: dựng lại recognizer (không tải lại onnx từ mạng,
+        # chỉ khởi tạo session từ path đã cache). Nằm ngoài vùng đo giờ nên không đụng RTF.
+        if self.reset_every and index % self.reset_every == 0:
+            self.recognizer = None
+            gc.collect()
+            self._build_recognizer()
 
     def transcribe(self, audio: np.ndarray, sample_rate: int) -> str:
         audio = np.ascontiguousarray(audio, dtype=np.float32)

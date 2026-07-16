@@ -42,6 +42,14 @@ class ASRModel(ABC):
         Trả về: text thô (chưa chuẩn hoá).
         """
 
+    def after_utterance(self, index: int) -> None:
+        """Hook gọi SAU mỗi utterance (ngoài vùng đo giờ) — index bắt đầu từ 1.
+
+        Dùng cho bảo trì định kỳ không được tính vào infer_time, ví dụ giải phóng
+        bộ nhớ tích lũy (onnxruntime arena). Mặc định no-op.
+        """
+        pass
+
     def teardown(self) -> None:
         """Giải phóng tài nguyên (tùy chọn)."""
         pass
