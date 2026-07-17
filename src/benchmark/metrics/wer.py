@@ -7,6 +7,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, asdict
 
+try:  # đường nhanh (C) cho chuỗi dài — hội thoại vài nghìn ký tự/từ
+    from rapidfuzz.distance import Levenshtein as _RF
+except ImportError:  # fallback thuần Python (chậm nhưng không cần cài gì)
+    _RF = None
+
 
 @dataclass
 class EditCounts:
@@ -46,6 +51,42 @@ class EditCounts:
 
 
 def align(ref: list[str], hyp: list[str]) -> EditCounts:
+    """Đếm S/D/I/hits. Dùng rapidfuzz (C) nếu có, ngược lại DP thuần Python."""
+    if _RF is None:
+        return _align_py(ref, hyp)
+    sub = ins = dele = 0
+    for tag, _s, _d in _RF.editops(ref, hyp).as_list():
+        if tag == "replace":
+            sub += 1
+        elif tag == "insert":
+            ins += 1
+        else:  # delete
+            dele += 1
+    n = len(ref)
+    return EditCounts(hits=n - sub - dele, sub=sub, ins=ins, dele=dele, ref_len=n)
+
+
+def align_ops(ref: list[str], hyp: list[str]) -> list[tuple]:
+    """Danh sách phép (equal/sub/del/ins) theo thứ tự xuôi. rapidfuzz nếu có."""
+    if _RF is None:
+        return _align_ops_py(ref, hyp)
+    ops = []
+    for tag, s1, s2, d1, d2 in _RF.opcodes(ref, hyp).as_list():
+        if tag == "equal":
+            ops += [("equal", ref[s1 + k], hyp[d1 + k]) for k in range(s2 - s1)]
+        elif tag == "replace":
+            m = min(s2 - s1, d2 - d1)
+            ops += [("sub", ref[s1 + k], hyp[d1 + k]) for k in range(m)]
+            ops += [("del", ref[s1 + k], None) for k in range(m, s2 - s1)]
+            ops += [("ins", None, hyp[d1 + k]) for k in range(m, d2 - d1)]
+        elif tag == "delete":
+            ops += [("del", ref[s1 + k], None) for k in range(s2 - s1)]
+        else:  # insert
+            ops += [("ins", None, hyp[d1 + k]) for k in range(d2 - d1)]
+    return ops
+
+
+def _align_py(ref: list[str], hyp: list[str]) -> EditCounts:
     """Căn chỉnh 2 chuỗi token, đếm S/D/I/hits qua Levenshtein + backtrace.
 
     Quy ước ràng buộc: nếu hyp có token đứng một mình không khớp -> insertion;
@@ -87,7 +128,7 @@ def align(ref: list[str], hyp: list[str]) -> EditCounts:
     return counts
 
 
-def align_ops(ref: list[str], hyp: list[str]) -> list[tuple]:
+def _align_ops_py(ref: list[str], hyp: list[str]) -> list[tuple]:
     """Như align() nhưng trả về danh sách phép căn chỉnh theo thứ tự xuôi.
 
     Mỗi phần tử: (op, ref_tok|None, hyp_tok|None) với op ∈ {equal, sub, del, ins}.
