@@ -138,7 +138,13 @@ def _draw_panel(ax, pts, xget, xlabel, title, xscale, assigned, seen, plt):
     ax.set_xlabel(xlabel, fontsize=10, color=MUTED)
     ax.set_ylabel("WER %  (nhỏ = chính xác hơn)", fontsize=10, color=MUTED)
     if xscale == "log":
+        from matplotlib.ticker import LogLocator, NullFormatter, FuncFormatter
         ax.set_xscale("log")
+        # chỉ ghi nhãn ở mốc tròn (0.001/0.01/0.1); ẩn nhãn minor cho đỡ rối
+        ax.xaxis.set_major_locator(LogLocator(base=10.0, subs=(1.0,)))
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=tuple(range(2, 10))))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
     ax.grid(True, color=GRID, lw=0.8, zorder=0, which="both")
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
