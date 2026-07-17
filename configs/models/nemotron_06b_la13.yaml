@@ -9,6 +9,7 @@ params:
   device: cuda
   target_lang: vi-VN
   att_context_size: [56, 13]
+  latency_ms: 1040     # 13 frame × 80ms (8x subsample × 10ms); khớp model card ~1.12s
   online_normalization: false
   pad_and_drop_preencoded: false
   strip_lang_tags: true

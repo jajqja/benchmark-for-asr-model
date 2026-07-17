@@ -9,6 +9,7 @@ params:
   device: cuda
   target_lang: vi-VN
   att_context_size: [56, 0]
+  latency_ms: 0        # lookahead 0 frame
   online_normalization: false
   pad_and_drop_preencoded: false
   strip_lang_tags: true

@@ -15,3 +15,4 @@ params:
   num_threads: 4
   decoding_method: greedy_search
   reset_every: 25       # tái tạo recognizer mỗi N utt để chặn RAM (onnxruntime arena); 0 = tắt
+  latency_ms: 2560     # ƯỚC LƯỢNG: 64 frame × ~40ms
