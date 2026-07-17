@@ -7,6 +7,7 @@ soundfile>=0.12      # đọc duration audio (fallback sang module `wave` cho .w
 librosa>=0.10        # resample chất lượng cao (dữ liệu 8kHz -> 16kHz); thiếu -> fallback tuyến tính
 matplotlib>=3.7      # vẽ scatter đánh đổi accuracy/speed (plot_tradeoff)
 rapidfuzz>=3.0       # edit-distance C cho WER/CER trên hội thoại dài (thiếu -> fallback Python chậm)
+openpyxl>=3.1        # xuất report .xlsx (leaderboard + errors mỗi model)
 
 # Tùy chọn — chỉ dùng để đối chiếu/kiểm chứng metric, không bắt buộc:
 # jiwer>=3.0

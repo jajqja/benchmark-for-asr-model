@@ -38,3 +38,8 @@ echo "=== biểu đồ đánh đổi accuracy/speed ==="
 python -m benchmark.report.plot_tradeoff \
   --csv results/reports/leaderboard.csv \
   --out results/reports/tradeoff.png || echo "(bỏ qua plot — thiếu RTF hoặc matplotlib)"
+
+echo "=== xuất report.xlsx (leaderboard + errors mỗi model) ==="
+python -m benchmark.report.to_xlsx \
+  --csv results/reports/leaderboard.csv \
+  --out results/reports/report.xlsx || echo "(bỏ qua xlsx — thiếu openpyxl)"
