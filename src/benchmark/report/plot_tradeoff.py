@@ -30,6 +30,8 @@ _FALLBACK = ["#CC79A7", "#56B4E9", "#F0E442", "#000000"]
 INK = "#1a1a1a"
 MUTED = "#6b6b6b"
 GRID = "#e6e6e6"
+# offset nhãn so le (points) để các điểm gần trùng không đè chữ lên nhau
+_LABEL_OFFSETS = [(6, 5), (6, -11), (-34, 5), (-34, -11)]
 
 
 def _family(model: str) -> str:
@@ -70,7 +72,7 @@ def _color(family, assigned):
     return assigned[family]
 
 
-def plot(by_ds, out_path, title):
+def plot(by_ds, out_path, title, xscale="log"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -100,23 +102,27 @@ def plot(by_ds, out_path, title):
             # điểm: marker >=8px, viền trắng 1.5px (surface ring khi chồng)
             ax.scatter(xs, ys, s=70, color=color, edgecolors="white",
                        linewidths=1.5, zorder=3, label=fam)
-            # nhãn variant từng điểm (ít điểm/nhóm -> gắn trực tiếp được)
-            for p in fam_pts:
+            # nhãn variant từng điểm, offset SO LE để bớt đè (điểm gần trùng nhau)
+            for k, p in enumerate(fam_pts):
+                dx, dy = _LABEL_OFFSETS[k % len(_LABEL_OFFSETS)]
                 ax.annotate(p["tag"], (p["rtf"], p["wer"]),
-                            textcoords="offset points", xytext=(6, 4),
+                            textcoords="offset points", xytext=(dx, dy),
                             fontsize=8, color=MUTED)
 
         ax.set_title(ds, fontsize=12, color=INK, pad=8)
-        ax.set_xlabel("RTF  (nhỏ = nhanh hơn →)", fontsize=10, color=MUTED)
+        xlab = "RTF, thang log  (nhỏ = nhanh hơn →)" if xscale == "log" \
+            else "RTF  (nhỏ = nhanh hơn →)"
+        ax.set_xlabel(xlab, fontsize=10, color=MUTED)
         ax.set_ylabel("WER %  (nhỏ = chính xác hơn)", fontsize=10, color=MUTED)
-        ax.grid(True, color=GRID, lw=0.8, zorder=0)
+        if xscale == "log":
+            ax.set_xscale("log")
+        ax.grid(True, color=GRID, lw=0.8, zorder=0, which="both")
         for spine in ("top", "right"):
             ax.spines[spine].set_visible(False)
         for spine in ("left", "bottom"):
             ax.spines[spine].set_color(GRID)
         ax.tick_params(colors=MUTED, labelsize=9)
-        # chú thích góc tốt nhất
-        ax.margins(0.12)
+        ax.margins(0.15)
 
     # legend chung (>=2 nhóm luôn có), 1 hàng trên cùng
     handles, labels = axes[0].get_legend_handles_labels()
@@ -137,13 +143,15 @@ def main(argv=None):
     ap.add_argument("--csv", default="results/reports/leaderboard.csv")
     ap.add_argument("--out", default="results/reports/tradeoff.png")
     ap.add_argument("--title", default="ASR: đánh đổi độ chính xác ↔ tốc độ")
+    ap.add_argument("--xscale", choices=["log", "linear"], default="log",
+                    help="thang trục RTF (log = mặc định, tách cụm điểm dày)")
     args = ap.parse_args(argv)
 
     by_ds = load_points(args.csv)
     if not by_ds:
         raise SystemExit(f"Không có điểm nào có RTF+WER trong {args.csv} "
                          "(cần chạy inference trên GPU để có RTF).")
-    plot(by_ds, args.out, args.title)
+    plot(by_ds, args.out, args.title, xscale=args.xscale)
 
 
 if __name__ == "__main__":
