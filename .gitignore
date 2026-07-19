@@ -233,3 +233,7 @@ __marimo__/
 
 # log tạm
 /log.txt
+
+# Bộ EVN (RIÊNG TƯ, mp3 8kHz)
+/EVNData/
+/EVNData_*.csv

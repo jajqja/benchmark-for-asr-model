@@ -38,6 +38,21 @@ def _load_yaml(path: str) -> dict:
         return yaml.safe_load(f) or {}
 
 
+def _coerce(v: str):
+    """Ép kiểu chuỗi CLI: int/float/bool/None -> đúng kiểu, còn lại giữ str."""
+    low = v.lower()
+    if low in ("true", "false"):
+        return low == "true"
+    if low in ("null", "none"):
+        return None
+    for cast in (int, float):
+        try:
+            return cast(v)
+        except ValueError:
+            pass
+    return v
+
+
 def _build_adapter(cfg: dict):
     """Nạp động adapter từ 'adapter: pkg.mod.ClassName' + params trong config."""
     dotted = cfg["adapter"]
@@ -94,9 +109,14 @@ def main(argv=None):
     ap.add_argument("--warmup", type=int, default=3, help="số utt chạy trước, không tính giờ")
     ap.add_argument("--limit", type=int, default=None, help="giới hạn số utt (debug/smoke-test)")
     ap.add_argument("--no-resume", action="store_true", help="bỏ qua resume, ghi đè từ đầu")
+    ap.add_argument("--set", action="append", default=[], metavar="key=value",
+                    help="ghi đè params trong config, vd --set provider=cpu (lặp nhiều lần)")
     args = ap.parse_args(argv)
 
     cfg = _load_yaml(args.model_config)
+    for kv in args.set:
+        k, _, v = kv.partition("=")
+        cfg.setdefault("params", {})[k.strip()] = _coerce(v.strip())
     manifest = load_manifest(args.manifest)
     if args.limit:
         manifest = manifest[: args.limit]

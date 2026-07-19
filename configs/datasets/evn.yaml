@@ -1,0 +1,17 @@
+# Bộ EVN (call-center điện lực, RIÊNG TƯ, mp3 8kHz).
+# Chỉ lấy dòng CÓ nhãn (cột Label không rỗng = transcript chuẩn do người gán);
+# bỏ nhãn người nói ("- NVCSKH:", "- Khách hàng:").
+# (soundfile đọc được mp3 nên không cần ffmpeg.)
+name: evn
+manifest: data/manifests/evn.jsonl
+
+prepare:
+  mode: table
+  table_path: EVNData_EVN_Grid.csv
+  audio_dir: EVNData
+  audio_ext: .mp3
+  id_column: Name
+  text_column: Label
+  require_columns: [Label]   # bỏ dòng Label rỗng
+  strip_speaker_labels: true
+  default_domain: evn

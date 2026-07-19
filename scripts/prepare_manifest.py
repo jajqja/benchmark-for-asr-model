@@ -77,6 +77,10 @@ def build_per_file(p: dict, default_domain: str):
 # Nhãn người nói đầu dòng: "Nhân viên CSKH:", "Khách hàng:", tên riêng, "Speaker 3:"...
 # Chỉ coi là nhãn khi phần trước dấu ':' ngắn (<=5 từ) và không chứa dấu câu kết câu.
 _LABEL_RE = re.compile(r"^\s*([^:.!?]{1,30}):\s*")
+# Nhãn-vai-trò còn sót GIỮA câu, có tiền tố gạch đầu dòng (vd "- Khách hàng." dùng '.'
+# thay ':'). Yêu cầu dấu gạch đầu để an toàn (không đụng chữ thường trong lời thoại).
+_INLINE_ROLE_RE = re.compile(
+    r"[-–]\s*(?:NVCSKH|NV|KH|Khách hàng|Nhân viên(?: CSKH)?)\s*[.:]", re.IGNORECASE)
 
 
 def clean_script(text: str, strip_labels: bool) -> str:
@@ -92,7 +96,10 @@ def clean_script(text: str, strip_labels: bool) -> str:
                 line = line[m.end():]
         if line:
             out.append(line)
-    return " ".join(" ".join(out).split())
+    joined = " ".join(" ".join(out).split())
+    if strip_labels:
+        joined = " ".join(_INLINE_ROLE_RE.sub(" ", joined).split())
+    return joined
 
 
 def _audio_index(audio_dir: str, ext: str) -> dict[str, str]:
@@ -112,10 +119,14 @@ def build_table(p: dict, default_domain: str):
     text_col = p.get("text_column", "text")
     domain_col = p.get("domain_column")
     filters = p.get("filters") or {}        # {Cột: giá trị chấp nhận} (str hoặc list)
+    require = p.get("require_columns") or []  # các cột PHẢI không rỗng (vd nhãn Label)
     strip_labels = p.get("strip_speaker_labels", False)
     audio = _audio_index(p["audio_dir"], p.get("audio_ext", ".wav"))
 
     def _passes(row) -> bool:
+        for col in require:
+            if not (row.get(col) or "").strip():
+                return False
         for col, want in filters.items():
             val = (row.get(col) or "").strip()
             ok = val in want if isinstance(want, (list, tuple, set)) else val == want
