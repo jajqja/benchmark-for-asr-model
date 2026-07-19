@@ -237,3 +237,11 @@ __marimo__/
 # Bộ EVN (RIÊNG TƯ, mp3 8kHz)
 /EVNData/
 /EVNData_*.csv
+
+# Kết quả/dẫn xuất chứa transcript hoặc chỉ để local (không commit)
+/auto_autoele*.jsonl
+/*.jsonl.meta.json
+/models/
+/results/metrics/
+/results/reports/errors_*
+/results/reports/*.xlsx
