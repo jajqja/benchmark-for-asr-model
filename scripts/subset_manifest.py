@@ -52,14 +52,25 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Lấy mẫu con manifest giữ tỉ lệ domain")
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--n", type=int, required=True)
+    ap.add_argument("--n", type=int, default=None,
+                    help="số utt sau lấy mẫu; bỏ trống = giữ tất cả (chỉ lọc theo duration)")
+    ap.add_argument("--max-duration", type=float, default=None,
+                    help="bỏ utt dài hơn N giây (vd model offline OOM ở audio dài)")
+    ap.add_argument("--min-duration", type=float, default=None)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--stratify-by", default="domain")
     args = ap.parse_args(argv)
 
     rows = read_jsonl(args.inp)
-    if args.n >= len(rows):
-        print(f"n={args.n} >= tổng {len(rows)} — sao chép nguyên bộ.", file=sys.stderr)
+    before = len(rows)
+    if args.max_duration is not None:
+        rows = [r for r in rows if (r.get("duration") or 0) <= args.max_duration]
+    if args.min_duration is not None:
+        rows = [r for r in rows if (r.get("duration") or 0) >= args.min_duration]
+    if before != len(rows):
+        print(f"lọc duration: {len(rows)}/{before} utt còn lại", file=sys.stderr)
+
+    if args.n is None or args.n >= len(rows):
         sub = sorted(rows, key=lambda r: r["utt_id"])
     else:
         sub = stratified_sample(rows, args.n, args.seed, args.stratify_by)
